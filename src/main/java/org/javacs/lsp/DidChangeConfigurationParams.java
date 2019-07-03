@@ -1,7 +1,8 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+
+import javax.json.JsonObject;
 
 public class DidChangeConfigurationParams {
-    public JsonElement settings;
+    public JsonObject settings;
 }

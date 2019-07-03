@@ -1,8 +1,8 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+import javax.json.JsonValue;
 
 public class RegistrationParams {
     public String id, method;
-    public JsonElement registerOptions;
+    public JsonValue registerOptions;
 }

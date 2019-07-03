@@ -1,13 +1,14 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+
+import javax.json.JsonValue;
 
 public interface LanguageClient {
     public void publishDiagnostics(PublishDiagnosticsParams params);
 
     public void showMessage(ShowMessageParams params);
 
-    public void registerCapability(String method, JsonElement options);
+    public void registerCapability(String method, JsonValue options);
 
-    public void customNotification(String method, JsonElement params);
+    public void customNotification(String method, JsonValue params);
 }

@@ -1,6 +1,7 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonArray;
+
+import javax.json.JsonArray;
 
 public class CodeLens {
     public Range range;

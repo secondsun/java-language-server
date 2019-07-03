@@ -1,20 +1,34 @@
 package org.javacs.lsp;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.google.gson.JsonObject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import javax.json.bind.JsonbBuilder;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class LspTest {
     PipedInputStream buffer = new PipedInputStream(10 * 1024 * 1024); // 10 MB buffer
     PipedOutputStream writer = new PipedOutputStream();
+
+
+
+    public static JsonValue readObject(Object params) {
+        JsonReader jsonReader =
+                Json.createReader(new StringReader(JsonbBuilder.create().toJson(params)));
+        return jsonReader.readObject();
+    }
 
     @Before
     public void connectBuffer() throws IOException {
@@ -75,7 +89,7 @@ public class LspTest {
         assertThat(parse.jsonrpc, equalTo("2.0"));
         assertThat(parse.id, equalTo(1));
         assertThat(parse.method, equalTo("initialize"));
-        assertThat(parse.params, equalTo(new JsonObject()));
+        assertThat(parse.params, equalTo(JsonObject.EMPTY_JSON_OBJECT));
     }
 
     @Test

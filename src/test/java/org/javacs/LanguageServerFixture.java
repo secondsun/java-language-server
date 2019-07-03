@@ -1,11 +1,12 @@
 package org.javacs;
 
-import com.google.gson.JsonElement;
+import org.javacs.lsp.*;
+
+import javax.json.JsonValue;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import org.javacs.lsp.*;
 
 class LanguageServerFixture {
 
@@ -37,10 +38,10 @@ class LanguageServerFixture {
                     public void showMessage(ShowMessageParams params) {}
 
                     @Override
-                    public void registerCapability(String method, JsonElement options) {}
+                    public void registerCapability(String method, JsonValue options) {}
 
                     @Override
-                    public void customNotification(String method, JsonElement params) {}
+                    public void customNotification(String method, JsonValue params) {}
                 });
     }
 

@@ -19,9 +19,31 @@
     <dependencies>
         <!-- JSON support -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.5</version>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
+            <version>1.1.5</version>
+        </dependency>
+        <!-- JSON-P -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.json</artifactId>
+            <version>1.1.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- JSON-B API -->
+        <dependency>
+            <groupId>jakarta.json.bind</groupId>
+            <artifactId>jakarta.json.bind-api</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <!-- Yasson (JSON-B implementation) -->
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>1.0.3</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- Testing framework -->
         <dependency>
@@ -49,6 +71,7 @@
             <version>1.21</version>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>

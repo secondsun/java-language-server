@@ -1,8 +1,9 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+
+import javax.json.JsonValue;
 
 public class RequestMessage {
     public String id, method;
-    public JsonElement params;
+    public JsonValue params;
 }

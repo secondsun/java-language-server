@@ -1,10 +1,11 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+
+import javax.json.JsonValue;
 
 public class Message {
     public String jsonrpc;
     public Integer id;
     public String method;
-    public JsonElement params;
+    public JsonValue params;
 }

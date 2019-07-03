@@ -1,10 +1,17 @@
 package org.javacs;
 
-import com.google.gson.Gson;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.javacs.lsp.*;
+
+import javax.json.Json;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import javax.json.bind.JsonbBuilder;
+
+import static org.javacs.lsp.LspTest.readObject;
 
 public class CompletionsBase {
     protected static final JavaLanguageServer server = LanguageServerFixture.getJavaLanguageServer();
@@ -35,7 +42,6 @@ public class CompletionsBase {
         var items = items(file, row, column);
         var result = new HashSet<String>();
         for (var i : items) {
-            i.data = new Gson().toJsonTree(i.data);
             var resolved = resolve(i);
             result.add(resolved.detail);
         }
@@ -91,4 +97,6 @@ public class CompletionsBase {
     protected CompletionItem resolve(CompletionItem item) {
         return server.resolveCompletionItem(item);
     }
+
+
 }

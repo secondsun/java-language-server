@@ -1,6 +1,6 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+import javax.json.JsonValue;
 import java.util.List;
 
 public class CompletionItem {
@@ -15,5 +15,5 @@ public class CompletionItem {
     public List<TextEdit> additionalTextEdits;
     public List<Character> commitCharacters;
     public Command command;
-    public JsonElement data;
+    public JsonValue data;
 }

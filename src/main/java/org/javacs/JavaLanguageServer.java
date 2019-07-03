@@ -1,10 +1,23 @@
 package org.javacs;
 
-import com.google.gson.*;
-import com.sun.source.doctree.*;
+import com.sun.source.doctree.DocCommentTree;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.ParamTree;
 import com.sun.source.tree.*;
 import com.sun.source.util.TreePath;
+import org.javacs.lsp.*;
+
+import javax.json.*;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,10 +26,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import javax.lang.model.element.*;
-import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
-import org.javacs.lsp.*;
 
 class JavaLanguageServer extends LanguageServer {
     // TODO allow multiple workspace roots
@@ -24,7 +33,7 @@ class JavaLanguageServer extends LanguageServer {
     private final LanguageClient client;
     private JavaCompilerService cacheCompiler;
     private JsonObject cacheSettings;
-    private JsonObject settings = new JsonObject();
+    private JsonObject settings = JsonObject.EMPTY_JSON_OBJECT;
 
     JavaCompilerService compiler() {
         if (!settings.equals(cacheSettings)) {
@@ -112,18 +121,24 @@ class JavaLanguageServer extends LanguageServer {
         LOG.info(String.format("...done linting in %d ms", elapsed.toMillis()));
     }
 
-    private static final Gson gson = new Gson();
+    private static final Jsonb jsonb = JsonbBuilder.create();
 
     private void javaStartProgress(JavaStartProgressParams params) {
-        client.customNotification("java/startProgress", gson.toJsonTree(params));
+        client.customNotification("java/startProgress", readObject(params));
     }
 
     private void javaReportProgress(JavaReportProgressParams params) {
-        client.customNotification("java/reportProgress", gson.toJsonTree(params));
+        client.customNotification("java/reportProgress",  readObject(params));
+    }
+
+    private JsonValue readObject(Object params) {
+        JsonReader jsonReader =
+                Json.createReader(new StringReader(jsonb.toJson(params)));
+        return jsonReader.readObject();
     }
 
     private void javaEndProgress() {
-        client.customNotification("java/endProgress", JsonNull.INSTANCE);
+        client.customNotification("java/endProgress", JsonValue.NULL);
     }
 
     private JavaCompilerService createCompiler() {
@@ -156,31 +171,31 @@ class JavaLanguageServer extends LanguageServer {
     }
 
     private Set<String> externalDependencies() {
-        if (!settings.has("externalDependencies")) return Set.of();
-        var array = settings.getAsJsonArray("externalDependencies");
+        if (!settings.containsKey("externalDependencies")) return Set.of();
+        var array = settings.getJsonArray("externalDependencies");
         var strings = new HashSet<String>();
         for (var each : array) {
-            strings.add(each.getAsString());
+            strings.add(((JsonString)each).getString());
         }
         return strings;
     }
 
     private Set<Path> classPath() {
-        if (!settings.has("classPath")) return Set.of();
-        var array = settings.getAsJsonArray("classPath");
+        if (!settings.containsKey("classPath")) return Set.of();
+        var array = settings.getJsonArray("classPath");
         var paths = new HashSet<Path>();
         for (var each : array) {
-            paths.add(Paths.get(each.getAsString()).toAbsolutePath());
+            paths.add(Paths.get(((JsonString)each).getString()).toAbsolutePath());
         }
         return paths;
     }
 
     private Set<String> addExports() {
-        if (!settings.has("addExports")) return Set.of();
-        var array = settings.getAsJsonArray("addExports");
+        if (!settings.containsKey("addExports")) return Set.of();
+        var array = settings.getJsonArray("addExports");
         var strings = new HashSet<String>();
         for (var each : array) {
-            strings.add(each.getAsString());
+            strings.add(((JsonString)each).getString());
         }
         return strings;
     }
@@ -190,44 +205,44 @@ class JavaLanguageServer extends LanguageServer {
         this.workspaceRoot = Paths.get(params.rootUri);
         FileStore.setWorkspaceRoots(Set.of(Paths.get(params.rootUri)));
 
-        var c = new JsonObject();
-        c.addProperty("textDocumentSync", 2); // Incremental
-        c.addProperty("hoverProvider", true);
-        var completionOptions = new JsonObject();
-        completionOptions.addProperty("resolveProvider", true);
-        var triggerCharacters = new JsonArray();
+        var c = Json.createObjectBuilder();
+        c.add("textDocumentSync", 2); // Incremental
+        c.add("hoverProvider", true);
+        var completionOptions = Json.createObjectBuilder();
+        completionOptions.add("resolveProvider", true);
+        var triggerCharacters = Json.createArrayBuilder();
         triggerCharacters.add(".");
         completionOptions.add("triggerCharacters", triggerCharacters);
         c.add("completionProvider", completionOptions);
-        var signatureHelpOptions = new JsonObject();
-        var signatureTrigger = new JsonArray();
+        var signatureHelpOptions = Json.createObjectBuilder();
+        var signatureTrigger = Json.createArrayBuilder();
         signatureTrigger.add("(");
         signatureTrigger.add(",");
         signatureHelpOptions.add("triggerCharacters", signatureTrigger);
         c.add("signatureHelpProvider", signatureHelpOptions);
-        c.addProperty("referencesProvider", true);
-        c.addProperty("definitionProvider", true);
-        c.addProperty("workspaceSymbolProvider", true);
-        c.addProperty("documentSymbolProvider", true);
-        c.addProperty("documentFormattingProvider", true);
-        var codeLensOptions = new JsonObject();
-        codeLensOptions.addProperty("resolveProvider", true);
+        c.add("referencesProvider", true);
+        c.add("definitionProvider", true);
+        c.add("workspaceSymbolProvider", true);
+        c.add("documentSymbolProvider", true);
+        c.add("documentFormattingProvider", true);
+        var codeLensOptions = Json.createObjectBuilder();
+        codeLensOptions.add("resolveProvider", true);
         c.add("codeLensProvider", codeLensOptions);
-        c.addProperty("foldingRangeProvider", true);
+        c.add("foldingRangeProvider", true);
 
-        return new InitializeResult(c);
+        return new InitializeResult(c.build());
     }
 
     @Override
     public void initialized() {
         // Register for didChangeWatchedFiles notifications
-        var options = new JsonObject();
-        var watchers = new JsonArray();
-        var watchJava = new JsonObject();
-        watchJava.addProperty("globPattern", "**/*.java");
+        var options = Json.createObjectBuilder();
+        var watchers = Json.createArrayBuilder();
+        var watchJava = Json.createObjectBuilder();
+        watchJava.add("globPattern", "**/*.java");
         watchers.add(watchJava);
         options.add("watchers", watchers);
-        client.registerCapability("workspace/didChangeWatchedFiles", gson.toJsonTree(options));
+        client.registerCapability("workspace/didChangeWatchedFiles", options.build());
     }
 
     @Override
@@ -249,7 +264,7 @@ class JavaLanguageServer extends LanguageServer {
 
     @Override
     public void didChangeConfiguration(DidChangeConfigurationParams change) {
-        settings = change.settings.getAsJsonObject();
+        settings = change.settings;
     }
 
     @Override
@@ -383,7 +398,7 @@ class JavaLanguageServer extends LanguageServer {
         for (var c : cs) {
             var i = new CompletionItem();
             var id = UUID.randomUUID().toString();
-            i.data = new JsonPrimitive(id);
+            i.data = Json.createValue(id);
             lastCompletions.put(id, c);
             if (c.element != null) {
                 i.label = c.element.getSimpleName().toString();
@@ -517,8 +532,8 @@ class JavaLanguageServer extends LanguageServer {
     @Override
     public CompletionItem resolveCompletionItem(CompletionItem unresolved) {
         if (unresolved.data == null) return unresolved;
-        var idJson = (JsonPrimitive) unresolved.data;
-        var id = idJson.getAsString();
+        var idJson = (JsonString) unresolved.data;
+        var id = idJson.getString();
         var cached = lastCompletions.get(id);
         if (cached == null) {
             LOG.warning("CompletionItem " + id + " was not in the cache");
@@ -943,23 +958,23 @@ class JavaLanguageServer extends LanguageServer {
             var memberName = JavaCompilerService.memberName(d);
             // If test class or method, add "Run Test" code lens
             if (cacheParse.isTestClass(d)) {
-                var arguments = new JsonArray();
+                var arguments = Json.createArrayBuilder();
                 arguments.add(uri.toString());
                 arguments.add(className);
-                arguments.add(JsonNull.INSTANCE);
-                var command = new Command("Run All Tests", "java.command.test.run", arguments);
+                arguments.add(JsonValue.NULL);
+                var command = new Command("Run All Tests", "java.command.test.run", arguments.build());
                 var lens = new CodeLens(range.get(), command, null);
                 result.add(lens);
                 // TODO run all tests in file
                 // TODO run all tests in package
             }
             if (cacheParse.isTestMethod(d)) {
-                var arguments = new JsonArray();
+                var arguments = Json.createArrayBuilder();
                 arguments.add(uri.toString());
                 arguments.add(className);
                 if (memberName.isPresent()) arguments.add(memberName.get());
-                else arguments.add(JsonNull.INSTANCE);
-                var command = new Command("Run Test", "java.command.test.run", arguments);
+                else arguments.add(JsonValue.NULL);
+                var command = new Command("Run Test", "java.command.test.run", arguments.build());
                 var lens = new CodeLens(range.get(), command, null);
                 result.add(lens);
             }
@@ -968,12 +983,12 @@ class JavaLanguageServer extends LanguageServer {
                 var start = range.get().start;
                 var line = start.line;
                 var character = start.character;
-                var data = new JsonArray();
+                var data = Json.createArrayBuilder();
                 data.add("java.command.findReferences");
                 data.add(uri.toString());
                 data.add(line);
                 data.add(character);
-                var lens = new CodeLens(range.get(), null, data);
+                var lens = new CodeLens(range.get(), null, data.build());
                 result.add(lens);
             }
         }
@@ -984,12 +999,12 @@ class JavaLanguageServer extends LanguageServer {
     public CodeLens resolveCodeLens(CodeLens unresolved) {
         // Unpack data
         var data = unresolved.data;
-        var command = data.get(0).getAsString();
+        var command = ((JsonString)data.get(0)).getString();
         assert command.equals("java.command.findReferences");
-        var uriString = data.get(1).getAsString();
+        var uriString = ((JsonString)data.get(1)).getString();
         var uri = URI.create(uriString);
-        var line = data.get(2).getAsInt() + 1;
-        var character = data.get(3).getAsInt() + 1;
+        var line = ((JsonNumber)data.get(2)).intValue() + 1;
+        var character = ((JsonNumber)data.get(3)).intValue() + 1;
         // Update command
         var count = countReferences(uri, line, character);
         String title;
@@ -997,11 +1012,11 @@ class JavaLanguageServer extends LanguageServer {
         else if (count == 1) title = "1 reference";
         else if (count == 100) title = "Find references";
         else title = String.format("%d references", count);
-        var arguments = new JsonArray();
+        var arguments = Json.createArrayBuilder();
         arguments.add(uri.toString());
         arguments.add(line - 1);
         arguments.add(character - 1);
-        unresolved.command = new Command(title, command, arguments);
+        unresolved.command = new Command(title, command, arguments.build());
 
         return unresolved;
     }

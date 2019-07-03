@@ -28,6 +28,7 @@
         "jdk.compiler/com.sun.tools.javac.model",
         "jdk.compiler/com.sun.tools.javac.util",
     ],
+    "java.configuration.updateBuildConfiguration": "automatic",
     // "typescript.tsserver.trace": "verbose",
     // "java.trace.server": "verbose",
 }

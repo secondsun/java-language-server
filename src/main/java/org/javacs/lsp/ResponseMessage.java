@@ -1,9 +1,10 @@
 package org.javacs.lsp;
 
-import com.google.gson.JsonElement;
+
+import javax.json.JsonValue;
 
 public class ResponseMessage {
     public String id;
-    public JsonElement result;
+    public JsonValue result;
     public ResponseError error;
 }
