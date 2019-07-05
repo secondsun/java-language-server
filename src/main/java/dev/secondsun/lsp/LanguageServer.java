@@ -117,4 +117,22 @@ public class LanguageServer {
     }
 
     public void doAsyncWork() {}
+    
+    /**
+     * This should call the client, and save the id that is returned
+     * @param params 
+     */
+    public void showMessageRequest(ShowMessageRequestParams params) {
+        throw new RuntimeException("Unimplemented");
+    }
+   
+    /**
+     * A previous call to showMessageReques should cache the id and handle the result.  This method is called automatically
+     * 
+     * @param id if os showMessageRequest
+     * @param result ActionItem that was chosen by the user.
+     */
+    public void handleShowMessageRequestResponse(int id, MessageActionItem result) {
+        throw new RuntimeException("Unimplemented");
+    }
 }

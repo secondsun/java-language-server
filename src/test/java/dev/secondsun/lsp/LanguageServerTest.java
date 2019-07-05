@@ -10,11 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import dev.secondsun.lsp.InitializeParams;
-import dev.secondsun.lsp.InitializeResult;
-import dev.secondsun.lsp.LSP;
-import dev.secondsun.lsp.LanguageClient;
-import dev.secondsun.lsp.LanguageServer;
 import org.junit.Before;
 import org.junit.Test;
 

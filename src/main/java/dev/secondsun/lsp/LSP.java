@@ -1,6 +1,5 @@
 package dev.secondsun.lsp;
 
-import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -137,11 +136,34 @@ public class LSP {
         writeClient(client, messageText);
     }
 
+    /**
+     * 
+     * @param client output stream writes to client
+     * @param method The method to be invoked.
+     * @param params The method's params (gets turned into a json string)
+     * @return request id to be used to handle the response from the client
+     */
+    private static int requestClient(OutputStream client, String method, Object params) {
+        if (params instanceof Optional) {
+            var option = (Optional) params;
+            params = option.orElse(null);
+        }
+        
+        var id = (int) (Math.random() * 20000);
+        
+        var jsonText = toJson(params);
+        var messageText = String.format("{\"jsonrpc\":\"2.0\",\"method\":\"%s\",\"params\":%s,\"id\":%d}", method, jsonText, id);
+        writeClient(client, messageText);
+        return id;
+    }
+    
     private static class RealClient implements LanguageClient {
         final OutputStream send;
+        final InputStream recv;
 
-        RealClient(OutputStream send) {
+        RealClient(OutputStream send, InputStream recv) {
             this.send = send;
+            this.recv = recv;
         }
 
         @Override
@@ -168,22 +190,29 @@ public class LSP {
         public void customNotification(String method, JsonValue params) {
             notifyClient(send, method, params);
         }
+
+        @Override
+        public int showMessageRequest(ShowMessageRequestParams requestParams) {
+            return requestClient(send, "window/showMessageRequest", requestParams);
+        }
     }
 
     public static void connect(
             Function<LanguageClient, LanguageServer> serverFactory, InputStream receive, OutputStream send) {
-        var server = serverFactory.apply(new RealClient(send));
+        var server = serverFactory.apply(new RealClient(send, receive));
         var pending = new ArrayBlockingQueue<Message>(10);
         var endOfStream = new Message();
 
         // Read messages and process cancellations on a separate thread
         class MessageReader implements Runnable {
             void peek(Message message) {
-                if (message.method.equals("$/cancelRequest")) {
-                    var params = jsonb.fromJson(message.params.toString(), CancelParams.class);
-                    var removed = pending.removeIf(r -> r.id != null && r.id.equals(params.id));
-                    if (removed) LOG.info(String.format("Cancelled request %d, which had not yet started", params.id));
-                    else LOG.info(String.format("Cannot cancel request %d because it has already started", params.id));
+                if (message.method != null) {//request
+                    if (message.method.equals("$/cancelRequest")) {
+                        var params = jsonb.fromJson(message.params.toString(), CancelParams.class);
+                        var removed = pending.removeIf(r -> r.id != null && r.id.equals(params.id));
+                        if (removed) LOG.info(String.format("Cancelled request %d, which had not yet started", params.id));
+                        else LOG.info(String.format("Cannot cancel request %d because it has already started", params.id));
+                    }
                 }
             }
 
@@ -249,6 +278,17 @@ public class LSP {
             // Otherwise, process the new message
             hasAsyncWork = true;
             try {
+                if (r.method == null) {
+                    MessageActionItem result = jsonb.fromJson(r.result.toString(), MessageActionItem.class);
+                    int id = r.id;
+                    if (r.error != null && !r.error.toString().isBlank()) {
+                        LOG.severe(r.error.toString());
+                        break;
+                    }
+                    server.handleShowMessageRequestResponse(id, result);
+
+                    break;
+                } else {
                 switch (r.method) {
                     case "initialize": {
                         var params = jsonb.fromJson(r.params.toString(), InitializeParams.class);
@@ -416,6 +456,7 @@ public class LSP {
                         break;
                     default:
                         LOG.warning(String.format("Don't know what to do with method `%s`", r.method));
+                }
                 }
             } catch (Exception e) {
                 LOG.log(Level.SEVERE, e.getMessage(), e);
