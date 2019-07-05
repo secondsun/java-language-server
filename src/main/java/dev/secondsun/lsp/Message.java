@@ -8,4 +8,7 @@ public class Message {
     public Integer id;
     public String method;
     public JsonValue params;
+    //Overloading for response messages
+    public JsonValue result;
+    public JsonValue error;
 }
