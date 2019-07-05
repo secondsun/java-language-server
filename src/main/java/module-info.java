@@ -1,4 +1,4 @@
-open module javacs {
+open module dev.secondsun.lsp {
     requires jdk.compiler;
     requires jdk.zipfs;
     requires java.logging;
@@ -8,5 +8,5 @@ open module javacs {
 
     uses javax.tools.JavaCompiler;
 
-    exports org.javacs.lsp;
+    exports dev.secondsun.lsp;
 }
