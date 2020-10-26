@@ -1,23 +1,44 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.secondsun</groupId>
   <artifactId>languageserver</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>This is a library that provides language server utilities for java.
+  </description>
+  <url>https://github.com/secondsun/java-language-server</url>
 
+  <licenses>
+      <license>
+          <name>The MIT License (MIT)</name>
+          <url>https://github.com/secondsun/java-language-server/blob/master/LICENSE.md</url>
+      </license>
+  </licenses>
   <distributionManagement>
     <repository>
       <id>distribution-repository</id>
       <name>Temporary Staging Repository</name>
       <url>file://${basedir}/dist</url>
     </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
+  <scm>
+    <connection>scm:git:git://github.com/secondsun/java-language-server.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/secondsun/java-language-server.git</developerConnection>
+    <url>http://github.com/secondsun/java-language-server/tree/master</url>
+</scm>
+
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
   </properties>
   <dependencies>
     <!-- JSON support -->
@@ -77,6 +98,7 @@
 
   </dependencies>
   <build>
+
     <plugins>
       <!-- Set source 1.10 -->
       <plugin>
@@ -84,8 +106,6 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <source>13</source>
-          <target>13</target>
           <compilerArgs>
             <arg>--add-exports</arg>
             <arg>jdk.compiler/com.sun.tools.javac.api=javacs</arg>
@@ -132,4 +152,64 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.7</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
