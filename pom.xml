@@ -4,17 +4,24 @@
   <groupId>dev.secondsun</groupId>
   <artifactId>languageserver</artifactId>
   <packaging>jar</packaging>
-  <version>0.2</version>
+  <version>0.3-SNAPSHOT</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>This is a library that provides language server utilities for java.
   </description>
   <url>https://github.com/secondsun/java-language-server</url>
-
+  <developers>
+    <developer>
+      <name>Summers Pittman</name>
+      <email>secondsun@gmail.com</email>
+      <organization>MeMyselfAndI</organization>
+      <organizationUrl>https://github.com/secondsun</organizationUrl>
+    </developer>
+  </developers>
   <licenses>
-      <license>
-          <name>The MIT License (MIT)</name>
-          <url>https://github.com/secondsun/java-language-server/blob/master/LICENSE.md</url>
-      </license>
+    <license>
+      <name>The MIT License (MIT)</name>
+      <url>https://github.com/secondsun/java-language-server/blob/master/LICENSE.md</url>
+    </license>
   </licenses>
   <distributionManagement>
     <repository>
@@ -30,7 +37,7 @@
     <connection>scm:git:git://github.com/secondsun/java-language-server.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/secondsun/java-language-server.git</developerConnection>
     <url>http://github.com/secondsun/java-language-server/tree/master</url>
-  <tag>v0.2</tag>
+    <tag>HEAD</tag>
   </scm>
 
 
