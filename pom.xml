@@ -18,9 +18,8 @@
   </licenses>
   <distributionManagement>
     <repository>
-      <id>distribution-repository</id>
-      <name>Temporary Staging Repository</name>
-      <url>file://${basedir}/dist</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <snapshotRepository>
       <id>ossrh</id>
