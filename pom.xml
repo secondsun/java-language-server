@@ -4,7 +4,7 @@
   <groupId>dev.secondsun</groupId>
   <artifactId>languageserver</artifactId>
   <packaging>jar</packaging>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.4</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>This is a library that provides language server utilities for java.
   </description>
@@ -37,7 +37,7 @@
     <connection>scm:git:git://github.com/secondsun/java-language-server.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/secondsun/java-language-server.git</developerConnection>
     <url>http://github.com/secondsun/java-language-server/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>languageserver-0.4</tag>
   </scm>
 
 
