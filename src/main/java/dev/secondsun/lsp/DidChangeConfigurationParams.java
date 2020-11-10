@@ -1,7 +1,6 @@
 package dev.secondsun.lsp;
 
-
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public class DidChangeConfigurationParams {
     public JsonObject settings;

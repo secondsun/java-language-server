@@ -1,6 +1,6 @@
 package dev.secondsun.lsp;
 
-import javax.json.JsonValue;
+import jakarta.json.JsonValue;
 import java.net.URI;
 import java.util.List;
 

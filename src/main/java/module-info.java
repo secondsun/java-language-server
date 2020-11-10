@@ -3,8 +3,8 @@ open module dev.secondsun.lsp {
     requires jdk.zipfs;
     requires java.logging;
     requires java.xml;
-    requires java.json.bind;
-    requires java.json;
+    requires jakarta.json.bind;
+    requires transitive jakarta.json;
 
     uses javax.tools.JavaCompiler;
 

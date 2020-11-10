@@ -1,7 +1,6 @@
 package dev.secondsun.lsp;
 
-
-import javax.json.JsonArray;
+import jakarta.json.JsonArray;
 
 public class DocumentLink {
     public Range range;

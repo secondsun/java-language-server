@@ -1,6 +1,6 @@
 package dev.secondsun.lsp;
 
-import javax.json.JsonValue;
+import jakarta.json.JsonValue;
 
 public class RegistrationParams {
     public String id, method;

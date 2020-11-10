@@ -1,14 +1,14 @@
 package dev.secondsun.lsp;
 
-
-import javax.json.JsonArray;
+import jakarta.json.JsonArray;
 
 public class CodeLens {
     public Range range;
     public Command command;
     public JsonArray data;
 
-    public CodeLens() {}
+    public CodeLens() {
+    }
 
     public CodeLens(Range range, Command command, JsonArray data) {
         this.range = range;

@@ -1,9 +1,9 @@
 package dev.secondsun.lsp;
 
-import javax.json.JsonValue;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import jakarta.json.JsonValue;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,9 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LSP {
-    private static final Jsonb jsonb = JsonbBuilder
-            .create(new JsonbConfig().withDeserializers(MarkedString.Adapter.INSTANCE).withSerializers(MarkedString.Adapter.INSTANCE));
-
+    private static final Jsonb jsonb = JsonbBuilder.create(new JsonbConfig()
+            .withDeserializers(MarkedString.Adapter.INSTANCE).withSerializers(MarkedString.Adapter.INSTANCE));
 
     private static String readHeader(InputStream client) {
         var line = new StringBuilder();
@@ -73,7 +72,8 @@ public class LSP {
         while (true) {
             result.append(next);
             i++;
-            if (i == byteLength) break;
+            if (i == byteLength)
+                break;
             next = read(client);
         }
         return result.toString();
@@ -84,10 +84,12 @@ public class LSP {
         while (true) {
             var line = readHeader(client);
             // If header is empty, next line is the start of the message
-            if (line.isEmpty()) return readLength(client, contentLength);
+            if (line.isEmpty())
+                return readLength(client, contentLength);
             // If header contains length, save it
             var maybeLength = parseHeader(line);
-            if (maybeLength != -1) contentLength = maybeLength;
+            if (maybeLength != -1)
+                contentLength = maybeLength;
         }
     }
 
@@ -148,15 +150,16 @@ public class LSP {
             var option = (Optional) params;
             params = option.orElse(null);
         }
-        
+
         var id = (int) (Math.random() * 20000);
-        
+
         var jsonText = toJson(params);
-        var messageText = String.format("{\"jsonrpc\":\"2.0\",\"method\":\"%s\",\"params\":%s,\"id\":%d}", method, jsonText, id);
+        var messageText = String.format("{\"jsonrpc\":\"2.0\",\"method\":\"%s\",\"params\":%s,\"id\":%d}", method,
+                jsonText, id);
         writeClient(client, messageText);
         return id;
     }
-    
+
     private static class RealClient implements LanguageClient {
         final OutputStream send;
         final InputStream recv;
@@ -197,8 +200,8 @@ public class LSP {
         }
     }
 
-    public static void connect(
-            Function<LanguageClient, LanguageServer> serverFactory, InputStream receive, OutputStream send) {
+    public static void connect(Function<LanguageClient, LanguageServer> serverFactory, InputStream receive,
+            OutputStream send) {
         var server = serverFactory.apply(new RealClient(send, receive));
         var pending = new ArrayBlockingQueue<Message>(10);
         var endOfStream = new Message();
@@ -206,12 +209,15 @@ public class LSP {
         // Read messages and process cancellations on a separate thread
         class MessageReader implements Runnable {
             void peek(Message message) {
-                if (message.method != null) {//request
+                if (message.method != null) {// request
                     if (message.method.equals("$/cancelRequest")) {
                         var params = jsonb.fromJson(message.params.toString(), CancelParams.class);
                         var removed = pending.removeIf(r -> r.id != null && r.id.equals(params.id));
-                        if (removed) LOG.info(String.format("Cancelled request %d, which had not yet started", params.id));
-                        else LOG.info(String.format("Cannot cancel request %d because it has already started", params.id));
+                        if (removed)
+                            LOG.info(String.format("Cancelled request %d, which had not yet started", params.id));
+                        else
+                            LOG.info(String.format("Cannot cancel request %d because it has already started",
+                                    params.id));
                     }
                 }
             }
@@ -238,7 +244,8 @@ public class LSP {
                         peek(message);
                         pending.put(message);
                     } catch (EndOfStream __) {
-                        if (kill()) return;
+                        if (kill())
+                            return;
                     } catch (Exception e) {
                         LOG.log(Level.SEVERE, e.getMessage(), e);
                     }
@@ -252,8 +259,7 @@ public class LSP {
         // Process messages on main thread
         LOG.info("Reading messages from queue...");
         var hasAsyncWork = false;
-        processMessages:
-        while (true) {
+        processMessages: while (true) {
             Message r;
             try {
                 // Take a break periodically
@@ -289,174 +295,174 @@ public class LSP {
 
                     break;
                 } else {
-                switch (r.method) {
-                    case "initialize": {
-                        var params = jsonb.fromJson(r.params.toString(), InitializeParams.class);
-                        var response = server.initialize(params);
-                        respond(send, r.id, response);
-                        break;
+                    switch (r.method) {
+                        case "initialize": {
+                            var params = jsonb.fromJson(r.params.toString(), InitializeParams.class);
+                            var response = server.initialize(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "initialized": {
+                            server.initialized();
+                            break;
+                        }
+                        case "shutdown": {
+                            LOG.warning("Got shutdown message");
+                            respond(send, r.id, null);
+                            break;
+                        }
+                        case "exit": {
+                            LOG.warning("Got exit message, exiting...");
+                            break processMessages;
+                        }
+                        case "workspace/didChangeWorkspaceFolders": {
+                            var params = jsonb.fromJson(r.params.toString(), DidChangeWorkspaceFoldersParams.class);
+                            server.didChangeWorkspaceFolders(params);
+                            break;
+                        }
+                        case "workspace/didChangeConfiguration": {
+                            var params = jsonb.fromJson(r.params.toString(), DidChangeConfigurationParams.class);
+                            server.didChangeConfiguration(params);
+                            break;
+                        }
+                        case "workspace/didChangeWatchedFiles": {
+                            var params = jsonb.fromJson(r.params.toString(), DidChangeWatchedFilesParams.class);
+                            server.didChangeWatchedFiles(params);
+                            break;
+                        }
+                        case "workspace/symbol": {
+                            var params = jsonb.fromJson(r.params.toString(), WorkspaceSymbolParams.class);
+                            var response = server.workspaceSymbols(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/documentLink": {
+                            var params = jsonb.fromJson(r.params.toString(), DocumentLinkParams.class);
+                            var response = server.documentLink(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/didOpen": {
+                            var params = jsonb.fromJson(r.params.toString(), DidOpenTextDocumentParams.class);
+                            server.didOpenTextDocument(params);
+                            break;
+                        }
+                        case "textDocument/didChange": {
+                            var params = jsonb.fromJson(r.params.toString(), DidChangeTextDocumentParams.class);
+                            server.didChangeTextDocument(params);
+                            break;
+                        }
+                        case "textDocument/willSave": {
+                            var params = jsonb.fromJson(r.params.toString(), WillSaveTextDocumentParams.class);
+                            server.willSaveTextDocument(params);
+                            break;
+                        }
+                        case "textDocument/willSaveWaitUntil": {
+                            var params = jsonb.fromJson(r.params.toString(), WillSaveTextDocumentParams.class);
+                            var response = server.willSaveWaitUntilTextDocument(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/didSave": {
+                            var params = jsonb.fromJson(r.params.toString(), DidSaveTextDocumentParams.class);
+                            server.didSaveTextDocument(params);
+                            break;
+                        }
+                        case "textDocument/didClose": {
+                            var params = jsonb.fromJson(r.params.toString(), DidCloseTextDocumentParams.class);
+                            server.didCloseTextDocument(params);
+                            break;
+                        }
+                        case "textDocument/completion": {
+                            var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
+                            var response = server.completion(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "completionItem/resolve": {
+                            var params = jsonb.fromJson(r.params.toString(), CompletionItem.class);
+                            var response = server.resolveCompletionItem(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/hover": {
+                            var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
+                            var response = server.hover(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/signatureHelp": {
+                            var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
+                            var response = server.signatureHelp(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/definition": {
+                            var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
+                            var response = server.gotoDefinition(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/references": {
+                            var params = jsonb.fromJson(r.params.toString(), ReferenceParams.class);
+                            var response = server.findReferences(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/documentSymbol": {
+                            var params = jsonb.fromJson(r.params.toString(), DocumentSymbolParams.class);
+                            var response = server.documentSymbol(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/codeAction": {
+                            var params = jsonb.fromJson(r.params.toString(), CodeActionParams.class);
+                            var response = server.codeAction(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/codeLens": {
+                            var params = jsonb.fromJson(r.params.toString(), CodeLensParams.class);
+                            var response = server.codeLens(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "codeLens/resolve": {
+                            var params = jsonb.fromJson(r.params.toString(), CodeLens.class);
+                            var response = server.resolveCodeLens(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/prepareRename": {
+                            var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
+                            var response = server.prepareRename(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/rename": {
+                            var params = jsonb.fromJson(r.params.toString(), RenameParams.class);
+                            var response = server.rename(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/formatting": {
+                            var params = jsonb.fromJson(r.params.toString(), DocumentFormattingParams.class);
+                            var response = server.formatting(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "textDocument/foldingRange": {
+                            var params = jsonb.fromJson(r.params.toString(), FoldingRangeParams.class);
+                            var response = server.foldingRange(params);
+                            respond(send, r.id, response);
+                            break;
+                        }
+                        case "$/cancelRequest":
+                            // Already handled in peek(message)
+                            break;
+                        default:
+                            LOG.warning(String.format("Don't know what to do with method `%s`", r.method));
                     }
-                    case "initialized": {
-                        server.initialized();
-                        break;
-                    }
-                    case "shutdown": {
-                        LOG.warning("Got shutdown message");
-                        respond(send, r.id, null);
-                        break;
-                    }
-                    case "exit": {
-                        LOG.warning("Got exit message, exiting...");
-                        break processMessages;
-                    }
-                    case "workspace/didChangeWorkspaceFolders": {
-                        var params = jsonb.fromJson(r.params.toString(), DidChangeWorkspaceFoldersParams.class);
-                        server.didChangeWorkspaceFolders(params);
-                        break;
-                    }
-                    case "workspace/didChangeConfiguration": {
-                        var params = jsonb.fromJson(r.params.toString(), DidChangeConfigurationParams.class);
-                        server.didChangeConfiguration(params);
-                        break;
-                    }
-                    case "workspace/didChangeWatchedFiles": {
-                        var params = jsonb.fromJson(r.params.toString(), DidChangeWatchedFilesParams.class);
-                        server.didChangeWatchedFiles(params);
-                        break;
-                    }
-                    case "workspace/symbol": {
-                        var params = jsonb.fromJson(r.params.toString(), WorkspaceSymbolParams.class);
-                        var response = server.workspaceSymbols(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/documentLink": {
-                        var params = jsonb.fromJson(r.params.toString(), DocumentLinkParams.class);
-                        var response = server.documentLink(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/didOpen": {
-                        var params = jsonb.fromJson(r.params.toString(), DidOpenTextDocumentParams.class);
-                        server.didOpenTextDocument(params);
-                        break;
-                    }
-                    case "textDocument/didChange": {
-                        var params = jsonb.fromJson(r.params.toString(), DidChangeTextDocumentParams.class);
-                        server.didChangeTextDocument(params);
-                        break;
-                    }
-                    case "textDocument/willSave": {
-                        var params = jsonb.fromJson(r.params.toString(), WillSaveTextDocumentParams.class);
-                        server.willSaveTextDocument(params);
-                        break;
-                    }
-                    case "textDocument/willSaveWaitUntil": {
-                        var params = jsonb.fromJson(r.params.toString(), WillSaveTextDocumentParams.class);
-                        var response = server.willSaveWaitUntilTextDocument(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/didSave": {
-                        var params = jsonb.fromJson(r.params.toString(), DidSaveTextDocumentParams.class);
-                        server.didSaveTextDocument(params);
-                        break;
-                    }
-                    case "textDocument/didClose": {
-                        var params = jsonb.fromJson(r.params.toString(), DidCloseTextDocumentParams.class);
-                        server.didCloseTextDocument(params);
-                        break;
-                    }
-                    case "textDocument/completion": {
-                        var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
-                        var response = server.completion(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "completionItem/resolve": {
-                        var params = jsonb.fromJson(r.params.toString(), CompletionItem.class);
-                        var response = server.resolveCompletionItem(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/hover": {
-                        var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
-                        var response = server.hover(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/signatureHelp": {
-                        var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
-                        var response = server.signatureHelp(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/definition": {
-                        var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
-                        var response = server.gotoDefinition(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/references": {
-                        var params = jsonb.fromJson(r.params.toString(), ReferenceParams.class);
-                        var response = server.findReferences(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/documentSymbol": {
-                        var params = jsonb.fromJson(r.params.toString(), DocumentSymbolParams.class);
-                        var response = server.documentSymbol(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/codeAction": {
-                        var params = jsonb.fromJson(r.params.toString(), CodeActionParams.class);
-                        var response = server.codeAction(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/codeLens": {
-                        var params = jsonb.fromJson(r.params.toString(), CodeLensParams.class);
-                        var response = server.codeLens(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "codeLens/resolve": {
-                        var params = jsonb.fromJson(r.params.toString(), CodeLens.class);
-                        var response = server.resolveCodeLens(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/prepareRename": {
-                        var params = jsonb.fromJson(r.params.toString(), TextDocumentPositionParams.class);
-                        var response = server.prepareRename(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/rename": {
-                        var params = jsonb.fromJson(r.params.toString(), RenameParams.class);
-                        var response = server.rename(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/formatting": {
-                        var params = jsonb.fromJson(r.params.toString(), DocumentFormattingParams.class);
-                        var response = server.formatting(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "textDocument/foldingRange": {
-                        var params = jsonb.fromJson(r.params.toString(), FoldingRangeParams.class);
-                        var response = server.foldingRange(params);
-                        respond(send, r.id, response);
-                        break;
-                    }
-                    case "$/cancelRequest":
-                        // Already handled in peek(message)
-                        break;
-                    default:
-                        LOG.warning(String.format("Don't know what to do with method `%s`", r.method));
-                }
                 }
             } catch (Exception e) {
                 LOG.log(Level.SEVERE, e.getMessage(), e);
