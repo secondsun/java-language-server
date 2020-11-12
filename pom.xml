@@ -1,11 +1,10 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.secondsun</groupId>
     <artifactId>languageserver</artifactId>
     <packaging>jar</packaging>
-    <version>0.5</version>
+    <version>0.6-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>This is a library that provides language server utilities for java.
     </description>
@@ -38,7 +37,7 @@
         <connection>scm:git:git://github.com/secondsun/java-language-server.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/secondsun/java-language-server.git</developerConnection>
         <url>http://github.com/secondsun/java-language-server/tree/master</url>
-        <tag>languageserver-0.5</tag>
+        <tag>HEAD</tag>
     </scm>
 
 
