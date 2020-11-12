@@ -1,18 +1,16 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.bind.serializer.DeserializationContext;
-import jakarta.json.bind.serializer.JsonbDeserializer;
-import jakarta.json.bind.serializer.JsonbSerializer;
-import jakarta.json.bind.serializer.SerializationContext;
-import jakarta.json.stream.JsonGenerator;
-import jakarta.json.stream.JsonParser;
-import java.lang.reflect.Type;
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
 
+@JsonAdapter(MarkedString.Adapter.class)
 public class MarkedString {
     public String language, value;
 
-    public MarkedString() {
-    }
+    public MarkedString() {}
 
     public MarkedString(String value) {
         this.value = value;
@@ -23,25 +21,24 @@ public class MarkedString {
         this.value = value;
     }
 
-    public static class Adapter implements JsonbDeserializer<MarkedString>, JsonbSerializer<MarkedString> {
-
-        public static Adapter INSTANCE = new Adapter();
-
+    public static class Adapter extends TypeAdapter<MarkedString> {
         @Override
-        public MarkedString deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-            throw new UnsupportedOperationException("Deserializing MarkedString's is unsupported.");
+        public void write(JsonWriter out, MarkedString markedString) throws IOException {
+            if (markedString.language == null) {
+                out.value(markedString.value);
+            } else {
+                out.beginObject();
+                out.name("language");
+                out.value(markedString.language);
+                out.name("value");
+                out.value(markedString.value);
+                out.endObject();
+            }
         }
 
         @Override
-        public void serialize(MarkedString markedString, JsonGenerator out, SerializationContext ctx) {
-            if (markedString.language == null) {
-                out.write(markedString.value);
-            } else {
-                out.writeStartObject();
-                out.write("language", markedString.language);
-                out.write("value", markedString.value);
-                out.writeEnd();
-            }
+        public MarkedString read(JsonReader reader) throws IOException {
+            throw new UnsupportedOperationException("Deserializing MarkedString's is unsupported.");
         }
     }
 }

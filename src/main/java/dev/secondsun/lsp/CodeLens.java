@@ -1,6 +1,7 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonArray;
+
+import com.google.gson.JsonArray;
 
 public class CodeLens {
     public Range range;

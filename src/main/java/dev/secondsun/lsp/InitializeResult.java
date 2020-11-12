@@ -1,6 +1,7 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonObject;
+
+import com.google.gson.JsonObject;
 
 public class InitializeResult {
     public JsonObject capabilities;

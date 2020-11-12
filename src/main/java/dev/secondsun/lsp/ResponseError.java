@@ -1,16 +1,16 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+import com.google.gson.JsonElement;
 
 public class ResponseError {
     public int code;
     public String message;
-    public JsonValue data;
+    public JsonElement data;
 
     public ResponseError() {
     }
 
-    public ResponseError(int code, String message, JsonValue data) {
+    public ResponseError(int code, String message, JsonElement data) {
         this.code = code;
         this.message = message;
         this.data = data;

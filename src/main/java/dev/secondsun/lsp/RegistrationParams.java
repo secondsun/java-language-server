@@ -1,8 +1,8 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+import com.google.gson.JsonElement;
 
 public class RegistrationParams {
     public String id, method;
-    public JsonValue registerOptions;
+    public JsonElement registerOptions;
 }

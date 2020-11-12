@@ -2,17 +2,13 @@ package dev.secondsun.lsp.test;
 
 import java.util.Arrays;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import dev.secondsun.lsp.CompletionItem;
 import dev.secondsun.lsp.LSP;
 import dev.secondsun.lsp.MarkedString;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbConfig;
-
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
-import jakarta.json.JsonValue;
-import jakarta.json.bind.JsonbBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,12 +27,10 @@ public class LspTest {
     PipedInputStream buffer = new PipedInputStream(10 * 1024 * 1024); // 10 MB buffer
     PipedOutputStream writer = new PipedOutputStream();
 
-    private static final Jsonb jsonb = JsonbBuilder.create(new JsonbConfig()
-            .withDeserializers(MarkedString.Adapter.INSTANCE).withSerializers(MarkedString.Adapter.INSTANCE));
+    private static final Gson jsonb = LSP.jsonb;
 
-    public static JsonValue readObject(Object params) {
-        JsonReader jsonReader = Json.createReader(new StringReader(JsonbBuilder.create().toJson(params)));
-        return jsonReader.readObject();
+    public static JsonElement readObject(Object params) {
+        return jsonb.toJsonTree(params);
     }
 
     @BeforeEach
@@ -101,7 +95,7 @@ public class LspTest {
         assertThat(parse.jsonrpc, equalTo("2.0"));
         assertThat(parse.id, equalTo(1));
         assertThat(parse.method, equalTo("initialize"));
-        assertThat(parse.params, equalTo(JsonObject.EMPTY_JSON_OBJECT));
+        assertThat(parse.params, equalTo(new JsonObject()));
     }
 
     @Test

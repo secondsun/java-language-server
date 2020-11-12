@@ -1,13 +1,8 @@
-open module dev.secondsun.lsp {
-    requires jdk.compiler;
-    requires jdk.zipfs;
-    requires java.logging;
-    requires java.xml;
-    requires jakarta.json.bind;
-    requires transitive jakarta.json;
-    requires org.eclipse.yasson;
+ open module dev.secondsun.lsp {
+     requires transitive jdk.zipfs;
+     requires transitive java.logging;
+     requires transitive java.xml;
+     requires transitive com.google.gson;
 
-    uses javax.tools.JavaCompiler;
-
-    exports dev.secondsun.lsp;
+     exports dev.secondsun.lsp;
 }

@@ -1,9 +1,10 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+import com.google.gson.JsonElement;
 
 public class ResponseMessage {
     public String id;
-    public JsonValue result;
+    public JsonElement result;
     public ResponseError error;
 }

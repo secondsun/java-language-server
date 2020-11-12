@@ -1,9 +1,9 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import jakarta.json.bind.JsonbConfig;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,8 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LSP {
-    private static final Jsonb jsonb = JsonbBuilder.create(new JsonbConfig()
-            .withDeserializers(MarkedString.Adapter.INSTANCE).withSerializers(MarkedString.Adapter.INSTANCE));
+
+    public static final Gson jsonb = new GsonBuilder().create();
 
     private static String readHeader(InputStream client) {
         var line = new StringBuilder();
@@ -180,7 +180,7 @@ public class LSP {
         }
 
         @Override
-        public void registerCapability(String method, JsonValue options) {
+        public void registerCapability(String method, JsonElement options) {
             var params = new RegistrationParams();
             params.id = UUID.randomUUID().toString();
             params.method = method;
@@ -190,7 +190,7 @@ public class LSP {
         }
 
         @Override
-        public void customNotification(String method, JsonValue params) {
+        public void customNotification(String method, JsonElement params) {
             notifyClient(send, method, params);
         }
 

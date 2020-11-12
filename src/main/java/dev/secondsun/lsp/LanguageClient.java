@@ -1,15 +1,16 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+import com.google.gson.JsonElement;
 
 public interface LanguageClient {
     public void publishDiagnostics(PublishDiagnosticsParams params);
 
     public void showMessage(ShowMessageParams params);
 
-    public void registerCapability(String method, JsonValue options);
+    public void registerCapability(String method, JsonElement options);
 
     public int showMessageRequest(final ShowMessageRequestParams requestParams);
 
-    public void customNotification(String method, JsonValue params);
+    public void customNotification(String method, JsonElement params);
 }

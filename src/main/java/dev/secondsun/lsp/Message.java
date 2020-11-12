@@ -1,13 +1,17 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+import com.google.gson.JsonElement;
 
 public class Message {
     public String jsonrpc;
     public Integer id;
     public String method;
-    public JsonValue params;
+    public JsonElement params;
     // Overloading for response messages
-    public JsonValue result;
-    public JsonValue error;
+    public JsonElement result;
+    public JsonElement error;
+
+
+
 }

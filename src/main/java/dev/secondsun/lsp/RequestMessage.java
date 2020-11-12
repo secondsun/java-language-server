@@ -1,8 +1,9 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+import com.google.gson.JsonElement;
 
 public class RequestMessage {
     public String id, method;
-    public JsonValue params;
+    public JsonElement params;
 }

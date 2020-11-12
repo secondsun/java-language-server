@@ -1,6 +1,9 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+
+import com.google.gson.JsonElement;
+
 import java.util.List;
 
 public class CompletionItem {
@@ -15,5 +18,6 @@ public class CompletionItem {
     public List<TextEdit> additionalTextEdits;
     public List<Character> commitCharacters;
     public Command command;
-    public JsonValue data;
+    public JsonElement data;
+
 }

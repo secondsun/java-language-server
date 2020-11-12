@@ -1,6 +1,8 @@
 package dev.secondsun.lsp;
 
-import jakarta.json.JsonValue;
+
+import com.google.gson.JsonElement;
+
 import java.net.URI;
 import java.util.List;
 
@@ -8,7 +10,7 @@ public class InitializeParams {
     public int processId;
     public String rootPath;
     public URI rootUri;
-    public JsonValue initializationOptions;
+    public JsonElement initializationOptions;
     public String trace;
     public List<WorkspaceFolder> workspaceFolders;
 }
