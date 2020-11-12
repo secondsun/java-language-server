@@ -1,16 +1,21 @@
-package dev.secondsun.lsp;
+package dev.secondsun.lsp.test;
 
 import java.util.Arrays;
+
+import dev.secondsun.lsp.CompletionItem;
+import dev.secondsun.lsp.LSP;
+import dev.secondsun.lsp.MarkedString;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbConfig;
-import org.junit.Before;
-import org.junit.Test;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.JsonbBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -18,9 +23,9 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+
 
 public class LspTest {
     PipedInputStream buffer = new PipedInputStream(10 * 1024 * 1024); // 10 MB buffer
@@ -34,7 +39,7 @@ public class LspTest {
         return jsonReader.readObject();
     }
 
-    @Before
+    @BeforeEach
     public void connectBuffer() throws IOException {
         writer.connect(buffer);
     }

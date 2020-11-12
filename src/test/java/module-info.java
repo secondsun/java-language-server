@@ -1,4 +1,4 @@
-open module dev.secondsun.lsp {
+open module dev.secondsun.lsp.test {
     requires jdk.compiler;
     requires jdk.zipfs;
     requires java.logging;
@@ -8,6 +8,10 @@ open module dev.secondsun.lsp {
     requires org.eclipse.yasson;
 
     uses javax.tools.JavaCompiler;
+    exports dev.secondsun.lsp.test;
 
-    exports dev.secondsun.lsp;
+    requires org.junit.jupiter.api;
+    requires dev.secondsun.lsp;
+    requires hamcrest.all; // additional test requirement
+
 }

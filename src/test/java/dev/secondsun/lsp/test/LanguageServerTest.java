@@ -1,7 +1,8 @@
-package dev.secondsun.lsp;
+package dev.secondsun.lsp.test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import dev.secondsun.lsp.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -10,8 +11,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public class LanguageServerTest {
     PipedInputStream clientToServer = new PipedInputStream(10 * 1024 * 1024),
@@ -29,8 +31,7 @@ public class LanguageServerTest {
         }
     }
 
-
-    @Before
+    @BeforeEach
     public void connectServerAndInitialize() throws IOException {
         writeClientToServer = new PipedOutputStream(clientToServer);
         writeServerToClient = new PipedOutputStream(serverToClient);

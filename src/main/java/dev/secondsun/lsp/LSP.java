@@ -79,7 +79,7 @@ public class LSP {
         return result.toString();
     }
 
-    static String nextToken(InputStream client) {
+    public static String nextToken(InputStream client) {
         var contentLength = -1;
         while (true) {
             var line = readHeader(client);
@@ -93,7 +93,7 @@ public class LSP {
         }
     }
 
-    static Message parseMessage(String token) {
+    public static Message parseMessage(String token) {
         return jsonb.fromJson(token, Message.class);
     }
 
@@ -111,14 +111,14 @@ public class LSP {
         }
     }
 
-    static String toJson(Object message) {
+    public static String toJson(Object message) {
         if (message == null) {
             return "null";
         }
         return jsonb.toJson(message);
     }
 
-    static void respond(OutputStream client, int requestId, Object params) {
+    public static void respond(OutputStream client, int requestId, Object params) {
         if (params instanceof Optional) {
             var option = (Optional) params;
             params = option.orElse(null);
