@@ -39,7 +39,7 @@
 <dependency>
     <groupId>dev.secondsun</groupId>
     <artifactId>languageserver</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.10.0</version>
 </dependency>
 ```
 

@@ -30,6 +30,10 @@
   ```bash
   ./mvnw clean package
   ```
+- **Deploy to Maven Central (Sonatype Central Portal)**:
+  ```bash
+  ./mvnw clean deploy -P release
+  ```
 
 ---
 
