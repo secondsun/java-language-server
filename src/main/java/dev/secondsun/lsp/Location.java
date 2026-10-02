@@ -31,4 +31,6 @@ public class Location {
     public int hashCode() {
         return Objects.hash(uri, range);
     }
+
+    public static final Location NONE = new Location(null, Range.NONE);
 }

@@ -1,6 +1,7 @@
 package dev.secondsun.lsp.test;
 
 import dev.secondsun.lsp.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,12 +23,18 @@ public class LanguageServerTest {
     LanguageServer mockServer;
     Thread main;
     CompletableFuture<Void> receivedInitialize = new CompletableFuture<>();
+    CompletableFuture<MessageActionItem> receivedResponse = new CompletableFuture<>();
 
     class TestLanguageServer extends LanguageServer {
         @Override
         public InitializeResult initialize(InitializeParams params) {
             receivedInitialize.complete(null);
             return new InitializeResult();
+        }
+
+        @Override
+        public void handleShowMessageRequestResponse(int id, MessageActionItem result) {
+            receivedResponse.complete(result);
         }
     }
 
@@ -37,6 +44,14 @@ public class LanguageServerTest {
         writeServerToClient = new PipedOutputStream(serverToClient);
         main = new Thread(this::runServer, "runServer");
         main.start();
+    }
+
+    @AfterEach
+    public void cleanup() throws IOException {
+        writeClientToServer.close();
+        writeServerToClient.close();
+        clientToServer.close();
+        serverToClient.close();
     }
 
     private void runServer() {
@@ -81,5 +96,18 @@ public class LanguageServerTest {
         // Wait for exit
         main.join(10_000);
         assertThat("Main thread has quit", main.isAlive(), equalTo(false));
+    }
+
+    @Test
+    public void showMessageRequestResponseHandledByServer()
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+        sendToServer(initializeMessage);
+        receivedInitialize.get(10, TimeUnit.SECONDS);
+
+        var responseJson = "{\"jsonrpc\":\"2.0\",\"id\":42,\"result\":{\"title\":\"Save\"}}";
+        sendToServer(responseJson);
+
+        var actionItem = receivedResponse.get(10, TimeUnit.SECONDS);
+        assertThat(actionItem.title, equalTo("Save"));
     }
 }

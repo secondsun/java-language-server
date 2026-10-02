@@ -1,7 +1,7 @@
 package dev.secondsun.lsp;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 public class DidChangeConfigurationParams {
-    public JsonObject settings;
+    public JsonElement settings;
 }

@@ -1,27 +1,24 @@
 package dev.secondsun.lsp.test;
 
-import java.util.Arrays;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import dev.secondsun.lsp.CompletionItem;
 import dev.secondsun.lsp.LSP;
-import dev.secondsun.lsp.MarkedString;
+import dev.secondsun.lsp.ResponseError;
+import dev.secondsun.lsp.ShowMessageParams;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.io.StringReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-
 
 public class LspTest {
     PipedInputStream buffer = new PipedInputStream(10 * 1024 * 1024); // 10 MB buffer
@@ -38,13 +35,19 @@ public class LspTest {
         writer.connect(buffer);
     }
 
+    @AfterEach
+    public void cleanup() throws IOException {
+        buffer.close();
+        writer.close();
+    }
+
     String bufferToString() {
         try {
             var available = buffer.available();
             var bytes = new byte[available];
             var read = buffer.read(bytes);
             assert read == available;
-            return new String(bytes, Charset.forName("UTF-8"));
+            return new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,12 +61,19 @@ public class LspTest {
     }
 
     @Test
+    public void writeError() {
+        LSP.error(writer, 1, new ResponseError(-100, "something went wrong", null));
+        var expected =
+                "Content-Length: 79\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"error\":{\"code\":-100,\"message\":\"something went wrong\"}}";
+        assertThat(bufferToString(), equalTo(expected));
+    }
+
+    @Test
     public void writeMultibyteCharacters() {
         LSP.respond(writer, 1, "🔥");
 
         var expected = "Content-Length: 40\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"🔥\"}";
         String bufferTo = bufferToString();
-        System.out.println(bufferTo.getBytes().length);
         assertThat(bufferTo, equalTo(expected));
     }
 
@@ -96,6 +106,27 @@ public class LspTest {
         assertThat(parse.id, equalTo(1));
         assertThat(parse.method, equalTo("initialize"));
         assertThat(parse.params, equalTo(new JsonObject()));
+    }
+
+    @Test
+    public void readMessageWithMultiBytesCharacters() throws IOException {
+        var params = new ShowMessageParams();
+        params.message = "🔥";
+        var message =
+                String.format(
+                        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\": %s}", jsonb.toJson(params));
+        var header = String.format("Content-Length: %d\r\n\r\n", message.getBytes().length);
+        writer.write(header.getBytes());
+        writer.write(message.getBytes());
+
+        var token = LSP.nextToken(buffer);
+        assertThat(token, equalTo(message));
+
+        var parse = LSP.parseMessage(token);
+        assertThat(parse.jsonrpc, equalTo("2.0"));
+        assertThat(parse.id, equalTo(1));
+        assertThat(parse.method, equalTo("initialize"));
+        assertThat(parse.params, equalTo(jsonb.toJsonTree(params)));
     }
 
     @Test

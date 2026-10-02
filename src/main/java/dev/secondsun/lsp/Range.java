@@ -29,4 +29,11 @@ public class Range {
     public int hashCode() {
         return Objects.hash(start, end);
     }
+
+    @Override
+    public String toString() {
+        return start + "-" + end;
+    }
+
+    public static final Range NONE = new Range(Position.NONE, Position.NONE);
 }

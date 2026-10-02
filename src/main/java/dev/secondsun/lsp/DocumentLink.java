@@ -1,9 +1,9 @@
 package dev.secondsun.lsp;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 
 public class DocumentLink {
     public Range range;
     public String target;
-    public JsonElement data;
+    public JsonArray data;
 }

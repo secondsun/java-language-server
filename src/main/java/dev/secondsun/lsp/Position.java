@@ -30,4 +30,11 @@ public class Position {
     public int hashCode() {
         return Objects.hash(line, character);
     }
+
+    @Override
+    public String toString() {
+        return line + "," + character;
+    }
+
+    public static final Position NONE = new Position(-1, -1);
 }
