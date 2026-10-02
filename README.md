@@ -1,180 +1,92 @@
-# Language Server for Java using the [Java compiler API](https://docs.oracle.com/javase/10/docs/api/jdk.compiler-summary.html) 
+# Java Language Server Protocol (LSP) Library
 
-A Java [language server](https://github.com/Microsoft/vscode-languageserver-protocol) based on v3.0 of the protocol and implemented using the Java compiler API. 
+[![Java CI](https://github.com/secondsun/java-language-server/actions/workflows/ci.yml/badge.svg)](https://github.com/secondsun/java-language-server/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.secondsun/languageserver.svg)](https://search.maven.org/artifact/dev.secondsun/languageserver)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![CircleCI](https://circleci.com/gh/georgewfraser/java-language-server.png)](https://circleci.com/gh/georgewfraser/java-language-server)
-
-## Installation (VS Code)
-
-[Install from the VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=georgewfraser.vscode-javac)
-
-## Installation (other editors)
-
-### Vim (with vim-lsc)
-
-- Checkout this repository
-- Run `./scripts/link_mac.sh`
-- Add the vim plugin [natebosch/vim-lsc](https://github.com/natebosch/vim-lsc) to your vimrc
-- Add vim-lsc configuration:
-  ```vimrc
-  let g:lsc_server_commands = {'java': '<path-to-java-language-server>/java-language-server/dist/mac/bin/launcher --quiet'}
-  ```
-- See the [vim-lsc README](https://github.com/natebosch/vim-lsc/blob/master/README.md) for other configuration options.
-
-Note: This tool is not compatible with [vim-lsp](https://github.com/prabirshrestha/vim-lsp) as it only supports LSPv2.0.
-
-## [Issues](https://github.com/georgewfraser/java-language-server/issues)
+`dev.secondsun:languageserver` is a lightweight, pure-Java implementation of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) data structures and JSON-RPC message pump.
 
 ## Features
 
-### Javadoc
+- **Standard LSP Data Types**: Clean Java POJOs for LSP protocol requests, responses, notifications, diagnostics, code actions, code lenses, completion, hover, and symbols.
+- **Fast JSON-RPC Transport**: Built-in streaming message pump (`LSP.connect(...)`) over standard input/output streams with Content-Length header framing and cancellation routing.
+- **Ultra-lightweight**: Minimal external dependencies (only Google Gson).
+- **Modern Java**: Targeted for Java 26 with full Java Platform Module System (JPMS) support (`dev.secondsun.lsp`).
 
-![Javadoc](images/Javadoc.png)
+## Prerequisites
 
-### Signature help
+- **Java Development Kit (JDK)**: Java 26 or newer.
+- **Build Tool**: Apache Maven (or the included `./mvnw` wrapper).
 
-![Signature help](images/SignatureHelp.png)
+## Quick Start
 
-### Autocomplete symbols (with auto-import)
+### Build and Test
 
-![Auto import 1](images/AutoImport1.png)
+```bash
+# Run all tests
+./mvnw clean test
 
-![Auto import 2](images/AutoImport2.png)
+# Run a specific test
+./mvnw test -Dtest=LanguageServerTest
 
-### Autocomplete members
-
-![Autocomplete members](images/AutocompleteMembers.png)
-
-### Go-to-definition
-
-![Goto 1](images/Goto1.png)
-
-![Goto 2](images/Goto2.png)
-
-### Find symbols
-
-![Find workspace symbols](images/FindWorkspaceSymbols.png)
-
-![Find document symbols](images/FindDocumentSymbols.png)
-
-### Lint
-
-![Error highlight](images/ErrorHighlight.png)
-
-### Type information on hover
-
-![Type hover](images/TypeHover.png)
-
-### Find references
-
-![Find references 1](images/FindReferences1.png)
-
-![Find references 2](images/FindReferences2.png)
-
-## Usage
-
-The language server will provide autocomplete and other features using:
-* .java files anywhere in your workspace
-* Java platform classes
-* External dependencies specified using `pom.xml`, Bazel, or [settings](#Settings)
-
-## Settings
-
-If the language server doesn't detect your external dependencies automatically, you can specify them using [.vscode/settings.json](https://code.visualstudio.com/docs/getstarted/settings)
-
-```json
-{
-    "java.externalDependencies": [
-        "junit:junit:jar:4.12:test", // Maven format
-        "junit:junit:4.12" // Gradle-style format is also allowed
-    ]
-}
+# Package JAR, sources, and Javadoc
+./mvnw clean package
 ```
 
-If all else fails, you can specify the java class path manually:
+### Maven Dependency
 
-```json
-{
-    "java.classPath": [
-        "lib/some-dependency.jar"
-    ]
-}
+```xml
+<dependency>
+    <groupId>dev.secondsun</groupId>
+    <artifactId>languageserver</artifactId>
+    <version>0.9-SNAPSHOT</version>
+</dependency>
 ```
 
-You can generate a list of external dependencies using your build tool:
-* Maven: `mvn dependency:list` 
-* Gradle: `gradle dependencies`
-
-The Java language server will look for the dependencies you specify in `java.externalDependencies` in your Maven and Gradle caches `~/.m2` and `~/.gradle`. You should use your build tool to download the library *and* source jars of all your dependencies so that the Java language server can find them:
-* Maven
-  * `mvn dependency:resolve` for compilation and autocomplete
-  * `mvn dependency:resolve -Dclassifier=sources` for inline Javadoc help
-* Gradle
-  * `gradle dependencies` for compilation and autocomplete
-  * Include `classifier: sources` in your build.gradle for inline Javadoc help, for example:
-    ```
-    dependencies {
-        testCompile group: 'junit', name: 'junit', version: '4.+'
-        testCompile group: 'junit', name: 'junit', version: '4.+', classifier: 'sources'
-    }
-    ```
-    
-## Design
-
-The Java language server uses the [Java compiler API](https://docs.oracle.com/javase/10/docs/api/jdk.compiler-summary.html) to implement language features like linting, autocomplete, and smart navigation, and the [language server protocol](https://github.com/Microsoft/vscode-languageserver-protocol) to communicate with text editors like VSCode.
-
-### Incremental updates
-
-The Java compiler API provides incremental compilation at the level of files: you can create a long-lived instance of the Java compiler, and as the user edits, you only need to recompile files that have changed. The Java language server optimizes this further by *focusing* compilation on the region of interest by erasing irrelevant code. For example, suppose we want to provide autocomplete after `print` in the below code:
+### Module Descriptor (`module-info.java`)
 
 ```java
-class Printer {
-    void printFoo() {
-        System.out.println("foo");
-    }
-    void printBar() {
-        System.out.println("bar");
-    }
-    void main() {
-        print // Autocomplete here
-    }
+module my.custom.lsp {
+    requires dev.secondsun.lsp;
 }
 ```
 
-None of the code inside `printFoo()` and `printBar()` is relevant to autocompleting `print`. Before servicing the autocomplete request, the Java language server erases the contents of these methods:
+## Basic Usage
+
+Implement the `LanguageServer` interface and connect it to your process's input/output streams:
 
 ```java
-class Printer {
-    void printFoo() {
-        
+import dev.secondsun.lsp.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public class MyServer extends LanguageServer {
+    private final LanguageClient client;
+
+    public MyServer(LanguageClient client) {
+        this.client = client;
     }
-    void printBar() {
-        
+
+    @Override
+    public InitializeResult initialize(InitializeParams params) {
+        var result = new InitializeResult();
+        // configure capabilities
+        return result;
     }
-    void main() {
-        print // Autocomplete here
+
+    public static void main(String[] args) {
+        InputStream in = System.in;
+        OutputStream out = System.out;
+        
+        LSP.connect(MyServer::new, in, out);
     }
 }
 ```
 
-For most requests, the vast majority of code can be erased, dramatically speeding up compilation.
+## Agentic Development
 
-## Logs
+This repository includes [AGENTS.md](AGENTS.md) as the canonical operational guide for AI agents and human pair programmers. Refer to `AGENTS.md` for build workflows, architectural invariants, and verification steps.
 
-The java service process will output a log file to stderr, which is visible in VSCode using View / Output, under "Java".
+## License
 
-## Contributing
-
-### Installing
-
-If you have npm and maven installed, you should be able to install locally using 
-
-    npm install -g vsce
-    npm install
-    ./scripts/build.sh
-
-At the time of this writing, the build only works on Mac, because of the way it uses JLink. However, it would be straightforward to fix this by changing `scripts/link_mac.sh` to be more like `scripts/link_windows.sh`.
-
-### Editing
-
-Please run ./configure before your first commit to install a pre-commit hook that formats the code.
+This project is licensed under the [MIT License](LICENSE.md).

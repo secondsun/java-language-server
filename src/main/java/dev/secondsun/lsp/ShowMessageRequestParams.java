@@ -18,5 +18,5 @@ public class ShowMessageRequestParams {
 	/**
 	 * The message action items to present.
 	 */
-	public List<MessageActionItem>actions = new ArrayList();
+	public List<MessageActionItem> actions = new ArrayList<>();
 }

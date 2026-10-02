@@ -119,8 +119,7 @@ public class LSP {
     }
 
     public static void respond(OutputStream client, int requestId, Object params) {
-        if (params instanceof Optional) {
-            var option = (Optional) params;
+        if (params instanceof Optional<?> option) {
             params = option.orElse(null);
         }
         var jsonText = toJson(params);
@@ -129,8 +128,7 @@ public class LSP {
     }
 
     private static void notifyClient(OutputStream client, String method, Object params) {
-        if (params instanceof Optional) {
-            var option = (Optional) params;
+        if (params instanceof Optional<?> option) {
             params = option.orElse(null);
         }
         var jsonText = toJson(params);
@@ -146,8 +144,7 @@ public class LSP {
      * @return request id to be used to handle the response from the client
      */
     private static int requestClient(OutputStream client, String method, Object params) {
-        if (params instanceof Optional) {
-            var option = (Optional) params;
+        if (params instanceof Optional<?> option) {
             params = option.orElse(null);
         }
 

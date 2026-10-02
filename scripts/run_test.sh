@@ -4,4 +4,4 @@ set -e
 
 ./scripts/check_java_home.sh
 
-mvn test -Dtest=$1#$2
+./mvnw test -Dtest="$1#$2"

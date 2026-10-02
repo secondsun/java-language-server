@@ -1,13 +1,17 @@
 #!/bin/bash
-# Check the version of java pointed to by JAVA_HOME in version 11.
+# Check the version of java pointed to by JAVA_HOME is version >= 26.
 
 set -e
 
 if [[ -z "${JAVA_HOME}" ]]; then
-  echo "JAVA_HOME must be set"
-  exit 1
+  if command -v java >/dev/null 2>&1; then
+    JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
+    export JAVA_HOME
+  else
+    echo "JAVA_HOME must be set or 'java' must be on PATH"
+    exit 1
+  fi
 fi
-
 
 if [ ! -f "$JAVA_HOME/bin/java" ]; then
   echo "JAVA_HOME is set to: $JAVA_HOME"
@@ -15,10 +19,10 @@ if [ ! -f "$JAVA_HOME/bin/java" ]; then
   exit 1
 fi
 
-java_version=$("$JAVA_HOME/bin/java" -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*".*/\1/p;')
-if [ "$java_version" -lt 11 ]; then
+java_version=$("$JAVA_HOME/bin/java" -version 2>&1 | head -n 1 | sed -E 's/.*version "([0-9]+).*/\1/')
+if [ -z "$java_version" ] || [ "$java_version" -lt 26 ]; then
   echo "JAVA_HOME is set to: $JAVA_HOME"
   echo "JAVA_HOME version is: $java_version"
-  echo "JAVA_HOME must be set to a JDK version >=11"
+  echo "JAVA_HOME must be set to a JDK version >=26"
   exit 1
 fi
