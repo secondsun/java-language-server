@@ -463,8 +463,14 @@ public class LSP {
                     case "$/cancelRequest":
                         // Already handled in peek(message)
                         break;
+                    case "$/setTrace":
+                        break;
                     default:
-                        LOG.warning(String.format("Don't know what to do with method `%s`", r.method));
+                        if (r.method != null && r.method.startsWith("$/")) {
+                            LOG.fine(String.format("Unhandled notification method `%s`", r.method));
+                        } else {
+                            LOG.warning(String.format("Don't know what to do with method `%s`", r.method));
+                        }
                 }
             } catch (Exception e) {
                 LOG.log(Level.SEVERE, e.getMessage(), e);

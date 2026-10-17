@@ -9,43 +9,34 @@ public class LanguageServer {
     }
 
     public void initialized() {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void shutdown() {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void didChangeConfiguration(DidChangeConfigurationParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void didOpenTextDocument(DidOpenTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void didChangeTextDocument(DidChangeTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void willSaveTextDocument(WillSaveTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public List<TextEdit> willSaveWaitUntilTextDocument(WillSaveTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
+        return List.of();
     }
 
     public void didSaveTextDocument(DidSaveTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void didCloseTextDocument(DidCloseTextDocumentParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-        throw new RuntimeException("Unimplemented");
     }
 
     public Optional<CompletionList> completion(TextDocumentPositionParams params) {
