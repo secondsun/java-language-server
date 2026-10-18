@@ -1,8 +1,6 @@
 package dev.secondsun.lsp;
 
-
 import com.google.gson.JsonElement;
-
 import java.net.URI;
 import java.util.List;
 

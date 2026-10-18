@@ -1,5 +1,8 @@
 package dev.secondsun.lsp.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,18 +10,14 @@ import dev.secondsun.lsp.CompletionItem;
 import dev.secondsun.lsp.LSP;
 import dev.secondsun.lsp.ResponseError;
 import dev.secondsun.lsp.ShowMessageParams;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class LspTest {
     PipedInputStream buffer = new PipedInputStream(10 * 1024 * 1024); // 10 MB buffer
@@ -112,9 +111,8 @@ public class LspTest {
     public void readMessageWithMultiBytesCharacters() throws IOException {
         var params = new ShowMessageParams();
         params.message = "🔥";
-        var message =
-                String.format(
-                        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\": %s}", jsonb.toJson(params));
+        var message = String.format(
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\": %s}", jsonb.toJson(params));
         var header = String.format("Content-Length: %d\r\n\r\n", message.getBytes().length);
         writer.write(header.getBytes());
         writer.write(message.getBytes());

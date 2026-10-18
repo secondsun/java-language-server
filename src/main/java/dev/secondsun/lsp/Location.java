@@ -23,8 +23,7 @@ public class Location {
             return false;
         }
         Location location = (Location) o;
-        return Objects.equals(uri, location.uri) &&
-            Objects.equals(range, location.range);
+        return Objects.equals(uri, location.uri) && Objects.equals(range, location.range);
     }
 
     @Override

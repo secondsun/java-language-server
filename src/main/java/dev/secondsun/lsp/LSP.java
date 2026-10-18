@@ -2,7 +2,6 @@ package dev.secondsun.lsp;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,8 +44,7 @@ public class LSP {
         return -1;
     }
 
-    static class EndOfStream extends RuntimeException {
-    }
+    static class EndOfStream extends RuntimeException {}
 
     private static char read(InputStream client) {
         try {
@@ -75,12 +73,10 @@ public class LSP {
         while (true) {
             var line = readHeader(client);
             // If header is empty, next line is the start of the message
-            if (line.isEmpty())
-                return readLength(client, contentLength);
+            if (line.isEmpty()) return readLength(client, contentLength);
             // If header contains length, save it
             var maybeLength = parseHeader(line);
-            if (maybeLength != -1)
-                contentLength = maybeLength;
+            if (maybeLength != -1) contentLength = maybeLength;
         }
     }
 
@@ -137,7 +133,7 @@ public class LSP {
     }
 
     /**
-     * 
+     *
      * @param client output stream writes to client
      * @param method The method to be invoked.
      * @param params The method's params (gets turned into a json string)
@@ -151,8 +147,8 @@ public class LSP {
         var id = (int) (Math.random() * 20000);
 
         var jsonText = toJson(params);
-        var messageText = String.format("{\"jsonrpc\":\"2.0\",\"method\":\"%s\",\"params\":%s,\"id\":%d}", method,
-                jsonText, id);
+        var messageText =
+                String.format("{\"jsonrpc\":\"2.0\",\"method\":\"%s\",\"params\":%s,\"id\":%d}", method, jsonText, id);
         writeClient(client, messageText);
         return id;
     }
@@ -187,8 +183,8 @@ public class LSP {
             var jsonText = toJson(params);
             var requestMethod = "client/registerCapability";
             var id = new Random().nextInt();
-            var messageText = String.format("{\"jsonrpc\":\"2.0\",\"id\":%d,\"method\":\"%s\",\"params\":%s}", id,
-                    requestMethod, jsonText);
+            var messageText = String.format(
+                    "{\"jsonrpc\":\"2.0\",\"id\":%d,\"method\":\"%s\",\"params\":%s}", id, requestMethod, jsonText);
             writeClient(send, messageText);
         }
 
@@ -203,8 +199,8 @@ public class LSP {
         }
     }
 
-    public static void connect(Function<LanguageClient, LanguageServer> serverFactory, InputStream receive,
-            OutputStream send) {
+    public static void connect(
+            Function<LanguageClient, LanguageServer> serverFactory, InputStream receive, OutputStream send) {
         var server = serverFactory.apply(new RealClient(send, receive));
         var pending = new ArrayBlockingQueue<Message>(10);
         var endOfStream = new Message();
@@ -212,15 +208,15 @@ public class LSP {
         // Read messages and process cancellations on a separate thread
         class MessageReader implements Runnable {
             void peek(Message message) {
-                if (message.method != null) {// request
+                if (message.method != null) { // request
                     if (message.method.equals("$/cancelRequest")) {
                         var params = gson.fromJson(message.params, CancelParams.class);
                         var removed = pending.removeIf(r -> r.id != null && r.id.equals(params.id));
                         if (removed)
                             LOG.info(String.format("Cancelled request %d, which had not yet started", params.id));
                         else
-                            LOG.info(String.format("Cannot cancel request %d because it has already started",
-                                    params.id));
+                            LOG.info(String.format(
+                                    "Cannot cancel request %d because it has already started", params.id));
                     }
                 }
             }
@@ -247,8 +243,7 @@ public class LSP {
                         peek(message);
                         pending.put(message);
                     } catch (EndOfStream __) {
-                        if (kill())
-                            return;
+                        if (kill()) return;
                     } catch (Exception e) {
                         LOG.log(Level.SEVERE, e.getMessage(), e);
                     }
@@ -262,7 +257,8 @@ public class LSP {
         // Process messages on main thread
         LOG.info("Reading messages from queue...");
         var hasAsyncWork = false;
-        processMessages: while (true) {
+        processMessages:
+        while (true) {
             Message r;
             try {
                 // Take a break periodically

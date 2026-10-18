@@ -21,8 +21,7 @@ public class Range {
             return false;
         }
         Range range = (Range) o;
-        return Objects.equals(start, range.start) &&
-            Objects.equals(end, range.end);
+        return Objects.equals(start, range.start) && Objects.equals(end, range.end);
     }
 
     @Override

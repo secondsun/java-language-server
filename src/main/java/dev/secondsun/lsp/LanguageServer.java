@@ -8,36 +8,27 @@ public class LanguageServer {
         throw new RuntimeException("Unimplemented");
     }
 
-    public void initialized() {
-    }
+    public void initialized() {}
 
-    public void shutdown() {
-    }
+    public void shutdown() {}
 
-    public void didChangeConfiguration(DidChangeConfigurationParams params) {
-    }
+    public void didChangeConfiguration(DidChangeConfigurationParams params) {}
 
-    public void didOpenTextDocument(DidOpenTextDocumentParams params) {
-    }
+    public void didOpenTextDocument(DidOpenTextDocumentParams params) {}
 
-    public void didChangeTextDocument(DidChangeTextDocumentParams params) {
-    }
+    public void didChangeTextDocument(DidChangeTextDocumentParams params) {}
 
-    public void willSaveTextDocument(WillSaveTextDocumentParams params) {
-    }
+    public void willSaveTextDocument(WillSaveTextDocumentParams params) {}
 
     public List<TextEdit> willSaveWaitUntilTextDocument(WillSaveTextDocumentParams params) {
         return List.of();
     }
 
-    public void didSaveTextDocument(DidSaveTextDocumentParams params) {
-    }
+    public void didSaveTextDocument(DidSaveTextDocumentParams params) {}
 
-    public void didCloseTextDocument(DidCloseTextDocumentParams params) {
-    }
+    public void didCloseTextDocument(DidCloseTextDocumentParams params) {}
 
-    public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-    }
+    public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {}
 
     public Optional<CompletionList> completion(TextDocumentPositionParams params) {
         throw new RuntimeException("Unimplemented");
@@ -108,18 +99,18 @@ public class LanguageServer {
     }
 
     public void doAsyncWork() {}
-    
+
     /**
      * This should call the client, and save the id that is returned
-     * @param params 
+     * @param params
      */
     public void showMessageRequest(ShowMessageRequestParams params) {
         throw new RuntimeException("Unimplemented");
     }
-   
+
     /**
      * A previous call to showMessageReques should cache the id and handle the result.  This method is called automatically
-     * 
+     *
      * @param id if os showMessageRequest
      * @param result ActionItem that was chosen by the user.
      */

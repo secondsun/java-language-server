@@ -1,6 +1,5 @@
 package dev.secondsun.lsp;
 
-
 import com.google.gson.JsonElement;
 
 public class Message {
@@ -11,7 +10,4 @@ public class Message {
     // Overloading for response messages
     public JsonElement result;
     public JsonElement error;
-
-
-
 }

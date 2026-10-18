@@ -22,8 +22,7 @@ public class Position {
             return false;
         }
         Position position = (Position) o;
-        return line == position.line &&
-            character == position.character;
+        return line == position.line && character == position.character;
     }
 
     @Override

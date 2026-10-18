@@ -1,9 +1,6 @@
 package dev.secondsun.lsp;
 
-
-
 import com.google.gson.JsonElement;
-
 import java.util.List;
 
 public class CompletionItem {
@@ -19,5 +16,4 @@ public class CompletionItem {
     public List<Character> commitCharacters;
     public Command command;
     public JsonElement data;
-
 }

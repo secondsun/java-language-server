@@ -18,11 +18,11 @@ public class SymbolInformation {
             return false;
         }
         SymbolInformation that = (SymbolInformation) o;
-        return kind == that.kind &&
-            deprecated == that.deprecated &&
-            Objects.equals(name, that.name) &&
-            Objects.equals(location, that.location) &&
-            Objects.equals(containerName, that.containerName);
+        return kind == that.kind
+                && deprecated == that.deprecated
+                && Objects.equals(name, that.name)
+                && Objects.equals(location, that.location)
+                && Objects.equals(containerName, that.containerName);
     }
 
     @Override

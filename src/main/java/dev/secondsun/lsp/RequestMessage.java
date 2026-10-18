@@ -1,6 +1,5 @@
 package dev.secondsun.lsp;
 
-
 import com.google.gson.JsonElement;
 
 public class RequestMessage {
