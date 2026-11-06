@@ -51,7 +51,7 @@
 
 3. **Invariants**:
    - **Zero bloat**: Keep external runtime dependencies strictly limited to Gson unless explicitly instructed.
-   - **Module boundary**: Any new exported package must be declared in [src/main/java/module-info.java](file:///home/summers/Projects/java-language-server/src/main/java/module-info.java).
+   - **Module boundary**: Any new exported package must be declared in [src/main/java/module-info.java](src/main/java/module-info.java).
    - **Modern Java 26 idioms**: Use pattern matching (`instanceof`), `var` where clarity permits, and avoid raw types.
 
 ---
